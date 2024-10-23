@@ -45,7 +45,7 @@ const schema = buildSchema(`
   }
   
   type TodoConnection {
-    edges: [TodoEdge]
+    edges: [TodoEdge!]
     pageInfo: PageInfo!
   }
 
@@ -74,11 +74,17 @@ const rootValue = {
     let endIndex: number = todos.length
 
     if (after) {
-      startIndex = todos.findIndex(todo => todo.id === after) + 1
+      const afterIndex = todos.findIndex(todo => todo.id === after)
+      if (afterIndex >= 0) {
+        startIndex = afterIndex + 1
+      }
     }
 
     if (before) {
-      endIndex = todos.findIndex(todo => todo.id === before)
+      const beforeIndex = todos.findIndex(todo => todo.id === before)
+      if (beforeIndex >= 0) {
+        endIndex = beforeIndex
+      }
     }
 
     let slicedTodos
@@ -93,8 +99,17 @@ const rootValue = {
     const edges = slicedTodos.map(todo => ({ cursor: todo.id, node: todo }))
     const startCursor = edges.length > 0 ? edges[0].cursor : null
     const endCursor = edges.length > 0 ? edges[edges.length - 1].cursor : null
-    const hasNextPage = endIndex < todos.length
-    const hasPreviousPage = startIndex > 0
+
+    let hasNextPage = endIndex < todos.length
+    let hasPreviousPage = startIndex > 0
+
+    if (first && slicedTodos.length === first) {
+      hasNextPage = startIndex + first < todos.length
+    }
+
+    if (last && slicedTodos.length === last) {
+      hasPreviousPage = endIndex - last > 0
+    }
 
     return {
       edges,
