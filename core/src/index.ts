@@ -63,6 +63,7 @@ const schema = buildSchema(`
   type Mutation {
     addTodo(text: String!): Todo
     updateTodo(id: ID!, text: String!): Todo
+    deleteTodo(id: ID!): Boolean
   }
 `)
 
@@ -134,6 +135,14 @@ const rootValue = {
     todo.text = text
     return todo
   },
+  deleteTodo: ({ id }: { id: string }) => {
+    const todoIndex = todos.findIndex(t => t.id === id)
+    if (todoIndex < 0) {
+      throw new Error('Todo not found')
+    }
+    todos.splice(todoIndex, 1)
+    return true
+  },
 }
 
 app.all('/graphql', createHandler({ schema, rootValue }))
@@ -146,7 +155,7 @@ app.get('/', (_req, res) => {
 const server = app.listen(port, () => {
   console.log(`Running a GraphQL IDE at http://localhost:${port}/`)
   console.log(`Running a GraphQL API server at http://localhost:${port}/graphql`)
-})
+}).on('error', console.error)
 
 // graceful shutdown
 function shutdownListener() {
