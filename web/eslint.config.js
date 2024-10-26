@@ -1,5 +1,4 @@
 import { fixupPluginRules } from '@eslint/compat'
-import { FlatCompat } from '@eslint/eslintrc'
 import pluginNext from '@next/eslint-plugin-next'
 import stylistic from '@stylistic/eslint-plugin'
 import pluginTs from '@typescript-eslint/eslint-plugin'
@@ -7,8 +6,7 @@ import parserTs from '@typescript-eslint/parser'
 import pluginReact from 'eslint-plugin-react'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginImportSort from 'eslint-plugin-simple-import-sort'
-
-const compat = new FlatCompat()
+import pluginTailwind from 'eslint-plugin-tailwindcss'
 
 /** @type {import('eslint').Linter.Config} */
 const style = stylistic.configs.customize({
@@ -51,14 +49,18 @@ const next = {
   },
 }
 
-const tailwindcss = compat.config({
-  extends: ['plugin:tailwindcss/recommended'],
-  settings: {
-    tailwindcss: {
-      callees: ['cn', 'cva'],
+/** @type {import('eslint').Linter.Config} */
+const tailwindcss = [
+  ...pluginTailwind.configs['flat/recommended'],
+  {
+    settings: {
+      tailwindcss: {
+        callees: ['cn', 'cva'],
+        config: 'tailwind.config.ts',
+      },
     },
   },
-})
+]
 
 /** @type {import('eslint').Linter.Config} */
 const sort = {
