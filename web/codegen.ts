@@ -10,6 +10,10 @@ const config: CodegenConfig = {
       preset: 'client',
       plugins: []
     },
+    './schema.json': {
+      plugins: ['introspection'],
+      config: {}
+    }
   }
 }
 

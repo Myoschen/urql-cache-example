@@ -33,6 +33,7 @@
     "@eslint/eslintrc": "^3.1.0",
     "@graphql-codegen/cli": "^5.0.3",
     "@graphql-codegen/client-preset": "^4.4.0",
+    "@graphql-codegen/introspection": "^4.0.3",
     "@next/eslint-plugin-next": "^14.2.16",
     "@stylistic/eslint-plugin": "^2.9.0",
     "@types/node": "^20.17.0",

@@ -18,8 +18,8 @@ const TodoFragment = graphql(`
 `)
 
 const TodoConnection = graphql(`
-  query TodoConnection ($first: Int, $last: Int, $after: String, $before: String) {
-    todos(first: $first, last: $last, after: $after, before: $before) {
+  query TodoConnection($first: Int, $last: Int, $after: String, $before: String) {
+    todos(first: $first, last: $last, after: $after, before: $before) @_relayPagination {
       edges {
         cursor
         node {
@@ -37,7 +37,7 @@ const TodoConnection = graphql(`
 `)
 
 const AddTodo = graphql(`
-  mutation AddTodo ($text: String!) {
+  mutation AddTodo($text: String!) {
     addTodo(text: $text) {
       ...TodoItem
     }
@@ -45,7 +45,7 @@ const AddTodo = graphql(`
 `)
 
 const UpdateTodo = graphql(`
-  mutation UpdateTodo ($id: ID!, $text: String!) {
+  mutation UpdateTodo($id: ID!, $text: String!) {
     updateTodo(id: $id, text: $text) {
       ...TodoItem
     }
@@ -53,7 +53,7 @@ const UpdateTodo = graphql(`
 `)
 
 const DeleteTodo = graphql(`
-  mutation DeleteTodo ($id: ID!) {
+  mutation DeleteTodo($id: ID!) {
     deleteTodo(id: $id)
   }
 `)

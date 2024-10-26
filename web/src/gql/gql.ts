@@ -15,10 +15,10 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 const documents = {
     "\n  fragment TodoItem on Todo {\n    id\n    text\n  }  \n": types.TodoItemFragmentDoc,
-    "\n  query TodoConnection ($first: Int, $last: Int, $after: String, $before: String) {\n    todos(first: $first, last: $last, after: $after, before: $before) {\n      edges {\n        cursor\n        node {\n          ...TodoItem\n        }\n      }\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.TodoConnectionDocument,
-    "\n  mutation AddTodo ($text: String!) {\n    addTodo(text: $text) {\n      ...TodoItem\n    }\n  }\n": types.AddTodoDocument,
-    "\n  mutation UpdateTodo ($id: ID!, $text: String!) {\n    updateTodo(id: $id, text: $text) {\n      ...TodoItem\n    }\n  }\n": types.UpdateTodoDocument,
-    "\n  mutation DeleteTodo ($id: ID!) {\n    deleteTodo(id: $id)\n  }\n": types.DeleteTodoDocument,
+    "\n  query TodoConnection($first: Int, $last: Int, $after: String, $before: String) {\n    todos(first: $first, last: $last, after: $after, before: $before) @_relayPagination {\n      edges {\n        cursor\n        node {\n          ...TodoItem\n        }\n      }\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n": types.TodoConnectionDocument,
+    "\n  mutation AddTodo($text: String!) {\n    addTodo(text: $text) {\n      ...TodoItem\n    }\n  }\n": types.AddTodoDocument,
+    "\n  mutation UpdateTodo($id: ID!, $text: String!) {\n    updateTodo(id: $id, text: $text) {\n      ...TodoItem\n    }\n  }\n": types.UpdateTodoDocument,
+    "\n  mutation DeleteTodo($id: ID!) {\n    deleteTodo(id: $id)\n  }\n": types.DeleteTodoDocument,
 };
 
 /**
@@ -42,19 +42,19 @@ export function graphql(source: "\n  fragment TodoItem on Todo {\n    id\n    te
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query TodoConnection ($first: Int, $last: Int, $after: String, $before: String) {\n    todos(first: $first, last: $last, after: $after, before: $before) {\n      edges {\n        cursor\n        node {\n          ...TodoItem\n        }\n      }\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query TodoConnection ($first: Int, $last: Int, $after: String, $before: String) {\n    todos(first: $first, last: $last, after: $after, before: $before) {\n      edges {\n        cursor\n        node {\n          ...TodoItem\n        }\n      }\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"];
+export function graphql(source: "\n  query TodoConnection($first: Int, $last: Int, $after: String, $before: String) {\n    todos(first: $first, last: $last, after: $after, before: $before) @_relayPagination {\n      edges {\n        cursor\n        node {\n          ...TodoItem\n        }\n      }\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"): (typeof documents)["\n  query TodoConnection($first: Int, $last: Int, $after: String, $before: String) {\n    todos(first: $first, last: $last, after: $after, before: $before) @_relayPagination {\n      edges {\n        cursor\n        node {\n          ...TodoItem\n        }\n      }\n      pageInfo {\n        startCursor\n        endCursor\n        hasNextPage\n        hasPreviousPage\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation AddTodo ($text: String!) {\n    addTodo(text: $text) {\n      ...TodoItem\n    }\n  }\n"): (typeof documents)["\n  mutation AddTodo ($text: String!) {\n    addTodo(text: $text) {\n      ...TodoItem\n    }\n  }\n"];
+export function graphql(source: "\n  mutation AddTodo($text: String!) {\n    addTodo(text: $text) {\n      ...TodoItem\n    }\n  }\n"): (typeof documents)["\n  mutation AddTodo($text: String!) {\n    addTodo(text: $text) {\n      ...TodoItem\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation UpdateTodo ($id: ID!, $text: String!) {\n    updateTodo(id: $id, text: $text) {\n      ...TodoItem\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateTodo ($id: ID!, $text: String!) {\n    updateTodo(id: $id, text: $text) {\n      ...TodoItem\n    }\n  }\n"];
+export function graphql(source: "\n  mutation UpdateTodo($id: ID!, $text: String!) {\n    updateTodo(id: $id, text: $text) {\n      ...TodoItem\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateTodo($id: ID!, $text: String!) {\n    updateTodo(id: $id, text: $text) {\n      ...TodoItem\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation DeleteTodo ($id: ID!) {\n    deleteTodo(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteTodo ($id: ID!) {\n    deleteTodo(id: $id)\n  }\n"];
+export function graphql(source: "\n  mutation DeleteTodo($id: ID!) {\n    deleteTodo(id: $id)\n  }\n"): (typeof documents)["\n  mutation DeleteTodo($id: ID!) {\n    deleteTodo(id: $id)\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

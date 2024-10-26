@@ -1,16 +1,17 @@
-import { cacheExchange } from '@urql/exchange-graphcache'
+import { cacheExchange, type CacheExchangeOpts } from '@urql/exchange-graphcache'
 import { relayPagination } from '@urql/exchange-graphcache/extras'
 import { Client, fetchExchange } from 'urql'
 
-const cache = cacheExchange({
-  resolvers: {
-    Query: {
-      todos: relayPagination(),
-    },
+import schema from '~/schema.json'
+
+const cacheOpts: Partial<CacheExchangeOpts> = {
+  schema,
+  directives: {
+    relayPagination: opts => relayPagination({ ...opts }),
   },
-})
+}
 
 export const client = new Client({
   url: 'http://localhost:4000/graphql',
-  exchanges: [cache, fetchExchange],
+  exchanges: [cacheExchange(cacheOpts), fetchExchange],
 })
