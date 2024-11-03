@@ -7,65 +7,18 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { type FragmentType, graphql, useFragment } from '@/gql'
-import type { TodoConnectionQueryVariables } from '@/gql/graphql'
-
-const TodoFragment = graphql(`
-  fragment TodoItem on Todo {
-    id
-    text
-  }  
-`)
-
-const TodoConnection = graphql(`
-  query TodoConnection($first: Int, $last: Int, $after: String, $before: String) {
-    todos(first: $first, last: $last, after: $after, before: $before) @_relayPagination {
-      edges {
-        cursor
-        node {
-          ...TodoItem
-        }
-      }
-      pageInfo {
-        startCursor
-        endCursor
-        hasNextPage
-        hasPreviousPage
-      }
-    }
-  }
-`)
-
-const AddTodo = graphql(`
-  mutation AddTodo($text: String!) {
-    addTodo(text: $text) {
-      ...TodoItem
-    }
-  }
-`)
-
-const UpdateTodo = graphql(`
-  mutation UpdateTodo($id: ID!, $text: String!) {
-    updateTodo(id: $id, text: $text) {
-      ...TodoItem
-    }
-  }
-`)
-
-const DeleteTodo = graphql(`
-  mutation DeleteTodo($id: ID!) {
-    deleteTodo(id: $id)
-  }
-`)
+import { type VariablesOf } from '@/lib/graphql'
+import { AddTodo, DeleteTodo, UpdateTodo } from '@/lib/graphql/mutations'
+import { TodosConnection } from '@/lib/graphql/queries'
 
 export default function Home() {
   const client = useClient()
   const [openAdd, setOpenAdd] = useState<boolean>(false)
   const [openUpdate, setOpenUpdate] = useState<boolean>(false)
   const [openDelete, setOpenDelete] = useState<boolean>(false)
-  const [variables, setVariables] = useState<TodoConnectionQueryVariables>({ first: 5 })
-  const [query, execute] = useQuery({ query: TodoConnection, variables })
-  const fragments = query.data?.todos?.edges?.map(({ node }) => node) ?? []
+  const [variables, setVariables] = useState<VariablesOf<typeof TodosConnection>>({ first: 5 })
+  const [query, execute] = useQuery({ query: TodosConnection, variables })
+  const todos = query.data?.todos?.edges?.map(({ node }) => node) ?? []
   const pageInfo = query.data?.todos?.pageInfo
 
   const handleMore = () => {
@@ -113,8 +66,11 @@ export default function Home() {
     <main className="flex min-h-screen items-center justify-center py-16">
       {/* list */}
       <ul className="space-y-4">
-        {fragments.map((fragment, index) => (
-          <TodoItem key={index} fragment={fragment} />
+        {todos.map(todo => (
+          <li key={todo.id} className="flex flex-col border-b pb-2 last:border-none">
+            <span className="text-xs">{todo.id}</span>
+            <span className="text-sm font-light text-muted-foreground">{todo.text}</span>
+          </li>
         ))}
       </ul>
 
@@ -211,16 +167,5 @@ export default function Home() {
         </Button>
       </div>
     </main>
-  )
-}
-
-function TodoItem({ fragment }: { fragment: FragmentType<typeof TodoFragment> }) {
-  const todo = useFragment(TodoFragment, fragment)
-
-  return (
-    <li className="flex flex-col border-b pb-2 last:border-none">
-      <span className="text-xs">{todo.id}</span>
-      <span className="text-sm font-light text-muted-foreground">{todo.text}</span>
-    </li>
   )
 }
