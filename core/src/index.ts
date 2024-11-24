@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import cors from 'cors'
+import { addDays, compareAsc } from 'date-fns'
 import express from 'express'
 import { buildSchema } from 'graphql'
 import { createHandler } from 'graphql-http/lib/use/express'
@@ -28,15 +29,22 @@ app.use(morgan('dev'))
 
 faker.seed(22)
 
-const todos = Array.from({ length: 20 }, () => ({
-  id: faker.string.uuid(),
-  text: faker.lorem.sentence(),
-}))
+const todos = Array.from({ length: 20 }, () => {
+  const date = faker.date.between({ from: new Date(), to: addDays(new Date(), 7) })
+  return {
+    id: faker.string.uuid(),
+    text: faker.lorem.sentence(),
+    createdAt: date.toISOString(),
+    updatedAt: date.toISOString(),
+  }
+})
 
 const schema = buildSchema(`
   type Todo {
     id: ID!
     text: String!
+    createdAt: String!
+    updatedAt: String!
   }
 
   type TodoEdge {
@@ -71,18 +79,20 @@ const rootValue = {
   todos: ({
     first, after, last, before,
   }: { first?: number, after?: string, last?: number, before?: string }) => {
+    const sortedTodos = todos.toSorted((a, b) => compareAsc(a.createdAt, b.createdAt))
+
     let startIndex: number = 0
     let endIndex: number = todos.length
 
     if (after) {
-      const afterIndex = todos.findIndex(todo => todo.id === after)
+      const afterIndex = sortedTodos.findIndex(todo => todo.id === after)
       if (afterIndex >= 0) {
         startIndex = afterIndex + 1
       }
     }
 
     if (before) {
-      const beforeIndex = todos.findIndex(todo => todo.id === before)
+      const beforeIndex = sortedTodos.findIndex(todo => todo.id === before)
       if (beforeIndex >= 0) {
         endIndex = beforeIndex
       }
@@ -90,11 +100,11 @@ const rootValue = {
 
     let slicedTodos
     if (first) {
-      slicedTodos = todos.slice(startIndex, startIndex + first)
+      slicedTodos = sortedTodos.slice(startIndex, startIndex + first)
     } else if (last) {
-      slicedTodos = todos.slice(Math.max(0, endIndex - last), endIndex)
+      slicedTodos = sortedTodos.slice(Math.max(0, endIndex - last), endIndex)
     } else {
-      slicedTodos = todos.slice(startIndex, endIndex)
+      slicedTodos = sortedTodos.slice(startIndex, endIndex)
     }
 
     const edges = slicedTodos.map(todo => ({ cursor: todo.id, node: todo }))
@@ -123,7 +133,13 @@ const rootValue = {
     }
   },
   addTodo: ({ text }: { text: string }) => {
-    const newTodo = { id: String(todos.length + 1), text }
+    const timestamp = new Date().toISOString()
+    const newTodo = {
+      id: faker.string.uuid(),
+      text,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }
     todos.push(newTodo)
     return newTodo
   },
@@ -133,6 +149,7 @@ const rootValue = {
       throw new Error('Todo not found')
     }
     todo.text = text
+    todo.updatedAt = new Date().toISOString()
     return todo
   },
   deleteTodo: ({ id }: { id: string }) => {

@@ -8,6 +8,8 @@ export const TodosConnection = graphql(`
         node {
           id
           text
+          createdAt
+          updatedAt
         }
       }
       pageInfo {

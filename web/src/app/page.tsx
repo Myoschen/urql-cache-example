@@ -1,12 +1,15 @@
 'use client'
 
 import { type FormEvent, useState } from 'react'
+import { CheckIcon, CopyIcon } from '@radix-ui/react-icons'
+import { compareDesc, format } from 'date-fns'
 import { useClient, useQuery } from 'urql'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useCopyState } from '@/hooks/use-copy-state'
 import { type VariablesOf } from '@/lib/graphql'
 import { AddTodo, DeleteTodo, UpdateTodo } from '@/lib/graphql/mutations'
 import { TodosConnection } from '@/lib/graphql/queries'
@@ -16,14 +19,14 @@ export default function Home() {
   const [openAdd, setOpenAdd] = useState<boolean>(false)
   const [openUpdate, setOpenUpdate] = useState<boolean>(false)
   const [openDelete, setOpenDelete] = useState<boolean>(false)
-  const [variables, setVariables] = useState<VariablesOf<typeof TodosConnection>>({ first: 5 })
+  const [variables, setVariables] = useState<VariablesOf<typeof TodosConnection>>({ last: 5 })
   const [query, execute] = useQuery({ query: TodosConnection, variables })
-  const todos = query.data?.todos?.edges?.map(({ node }) => node) ?? []
+  const todos = query.data?.todos?.edges?.map(({ node }) => node).toSorted((a, b) => compareDesc(a.createdAt, b.createdAt)) ?? []
   const pageInfo = query.data?.todos?.pageInfo
 
   const handleMore = () => {
-    const { endCursor, hasNextPage } = pageInfo ?? {}
-    if (hasNextPage && endCursor) setVariables({ first: 5, after: endCursor })
+    const { startCursor, hasPreviousPage } = pageInfo ?? {}
+    if (hasPreviousPage && startCursor) setVariables({ last: 5, before: startCursor })
   }
 
   const handleAdd = async (ev: FormEvent<HTMLFormElement>) => {
@@ -66,12 +69,7 @@ export default function Home() {
     <main className="flex min-h-screen items-center justify-center py-16">
       {/* list */}
       <ul className="space-y-4">
-        {todos.map(todo => (
-          <li key={todo.id} className="flex flex-col border-b pb-2 last:border-none">
-            <span className="text-xs">{todo.id}</span>
-            <span className="text-sm font-light text-muted-foreground">{todo.text}</span>
-          </li>
-        ))}
+        {todos.map(todo => <TodoItem key={todo.id} item={todo} />)}
       </ul>
 
       {/* floating bar */}
@@ -167,5 +165,32 @@ export default function Home() {
         </Button>
       </div>
     </main>
+  )
+}
+
+type Todo = {
+  id: string
+  text: string
+  createdAt: string
+  updatedAt: string
+}
+
+function TodoItem({ item }: { item: Todo }) {
+  const { copied, copy } = useCopyState()
+
+  return (
+    <li className="flex flex-col border-b pb-2 last:border-none">
+      <div className="flex items-center gap-x-1">
+        <span className="text-xs font-light text-muted-foreground">{item.id}</span>
+        <button className="group relative inline-flex items-center" data-state={copied} onClick={() => copy(item.id)}>
+          <CopyIcon className="size-3 text-muted-foreground transition-transform group-data-[state=true]:scale-0" />
+          <CheckIcon className="absolute size-3.5 scale-0 text-green-600 transition-transform group-data-[state=true]:scale-100" />
+        </button>
+      </div>
+      <span className="text-sm">{item.text}</span>
+      <time className="text-xs font-light text-accent-foreground" dateTime={item.createdAt}>
+        {format(item.createdAt, 'PPpp')}
+      </time>
+    </li>
   )
 }

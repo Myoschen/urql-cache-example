@@ -5,6 +5,8 @@ export const AddTodo = graphql(`
     addTodo(text: $text) {
       id
       text
+      createdAt
+      updatedAt
     }
   }
 `)
@@ -14,6 +16,8 @@ export const UpdateTodo = graphql(`
     updateTodo(id: $id, text: $text) {
       id
       text
+      createdAt
+      updatedAt
     }
   }
 `)
