@@ -1,4 +1,4 @@
-import { fixupPluginRules } from '@eslint/compat'
+import { fixupPluginRules, includeIgnoreFile } from '@eslint/compat'
 import pluginNext from '@next/eslint-plugin-next'
 import stylistic from '@stylistic/eslint-plugin'
 import pluginTs from '@typescript-eslint/eslint-plugin'
@@ -7,6 +7,8 @@ import pluginReact from 'eslint-plugin-react'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginImportSort from 'eslint-plugin-simple-import-sort'
 import pluginTailwind from 'eslint-plugin-tailwindcss'
+import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 /** @type {import('eslint').Linter.Config} */
 const style = stylistic.configs.customize({
@@ -41,6 +43,7 @@ const next = {
     ...pluginReactHooks.configs.recommended.rules,
     ...pluginNext.configs.recommended.rules,
     ...pluginNext.configs['core-web-vitals'].rules,
+    '@typescript-eslint/no-empty-object-type': 'warn',
   },
   settings: {
     react: {
@@ -88,4 +91,8 @@ const ignores = {
   ignores: ['./.next/*', './src/gql'],
 }
 
-export default [style, next, ...tailwindcss, sort, ignores]
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const gitignorePath = path.resolve(__dirname, '.gitignore')
+
+export default [style, next, ...tailwindcss, sort, ignores, includeIgnoreFile(gitignorePath)]
